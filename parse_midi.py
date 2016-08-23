@@ -1,5 +1,5 @@
 import midi
-from operator import itemgetter
+from operator import itemgetter, attrgetter
 import numpy as np
 
 """
@@ -30,14 +30,6 @@ def get_data(pattern, d, event):
 
 	return data
 """
-def get_tick(pattern, d, event):
-	tick = []
-	for i in range(len(pattern[d])):
-		if isinstance(pattern[d][i], event):
-			tick.append(pattern[d][i].tick)
-
-	return tick	
-
 def remove_duplicates(r):
 	for i in range(1, len(r)):
 		if r[i] == r[i-1]:
@@ -61,7 +53,7 @@ def compress(r):
 
 	return r
 
-def fix(r):
+def fix(r):#AKA fill
 	#Fill empty zeroes in the tempo things
 	for i in range(1, len(r[1])-1):#Skip time and tempo events
 		a = 0
@@ -77,30 +69,51 @@ def fix(r):
 			else:
 				a = v
 				r[u][i]
-
+	"""
+	Recently removed. Removes the fix for tempoevents
 	tempo = 0
 	for i in range(len(r)):
 		if r[i][130] != 0:
 			tempo = r[i][130]
 		else:
 			r[i][130] = tempo
-
+"""
 	return r
-		
 
 def parse(filename):
 	p = midi.read_midifile(filename)
-	p.make_ticks_abs()#Holy fuck, that's awesome
-
+	#p.make_ticks_abs()#Holy fuck, that's awesome
+	#TODO Test this shit
+	#Only works with midi format 0... for now
+	"""
+	mid = p
+	i = 1
+	while i < len(mid):
+		for u in mid[i]:
+		mid[0].append(u)
+	#mid[0].append(mid[i])
+		mid.pop(i)
+	#####FIXME TODO TODO FIXME Sort
+	#track = mid[0]
+	#track.sort()
+	#mid[0] = track
+	#Okay, def not working.
+	#mid[0].sort()
+	mid[0] = midi.Track(events=(sorted(mid[0], key=attrgetter('tick'))), tick_relative=False)
+	p = mid
+	p.make_ticks_rel()
+	"""
+	####Should work. Fix other errors TODO	
 	r = []
+	"""
 	for i in range(len(p[0])):
 		if type(p[0][i]) == midi.SetTempoEvent:
 			frame = [0]*131
 			frame[0] = p[0][i].tick
 			frame[130] = to_int(p[0][i].data)
 			r.append(frame)
-
-	for u in range(1, 4):
+	"""
+	for u in range(len(p)):
 		for i in range(len(p[u])):
 			if type(p[u][i]) == midi.NoteOnEvent:
 				frame = [0]*131
@@ -118,9 +131,15 @@ def parse(filename):
 				v = p[u][i].data[1]
 				frame[129] = 1 if v != 0 else -1
 				r.append(frame)
+			elif type(p[0][i]) == midi.SetTempoEvent:
+				frame = [0]*131
+				frame[0] = p[0][i].tick
+				frame[130] = to_int(p[0][i].data)
+				r.append(frame)
 	
-	r.sort(key=itemgetter(0))
-	r = compress(fix(r))#Fix, compress and remove duplicates
-	r.sort(key=itemgetter(0))#TODO this is just a test... and it seems to work
+	#r.sort(key=itemgetter(0))
+	#Maybe remove compress?
+	#r = compress(fix(r))#Fix, compress and remove duplicates
+	r = fix(r)
+	#r.sort(key=itemgetter(0))#TODO this is just a test... and it seems to work
 	return r
-#return np.array(r)
