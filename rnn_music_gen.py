@@ -74,7 +74,6 @@ def remove_duplicates(r):
 		if r[i] == r[i-1]:
 			r.pop(i)
 			i = i-1
-			print "?"
 		i = i+1
 
 	return r
@@ -107,7 +106,8 @@ def create_dataset(norm=True):
 	songs = []
 	files = listdir("music/")
 	for i in files:
-		songs.append(to_rel_timesteps(parse_midi.parse("music/"+i)))
+		songs.append(parse_midi.parse("music/"+i))
+		#songs.append(to_rel_timesteps(parse_midi.parse("music/"+i)))
 	if norm:
 		return normalize(songs)
 	else:
