@@ -16,31 +16,12 @@ from keras.layers import Recurrent, LSTM
 from keras.layers.core import Dense, Dropout, Activation, Masking
 from keras.layers.embeddings import Embedding
 
-"""
-time is not always increasing
-
-gets a fuckton of tiny ones. Remove those.
-"""
-
-
 def to_dataset(r):
 	m = 0
 	for i in range(len(r)):
 		if len(r[i]) > m:
 			m = len(r[i])
 	return np.zeros(len(r), m, 131)
-
-def to_rel_timesteps(r):#Temp. workaround. Change the midi to rel timesteps in future
-	for i in range(1, len(r)):
-		r[i][0] = float(r[i][0]-r[i-1][0]) #Returns negative values. wtf?
-	return r
-
-def to_abs_timesteps(r):#Maybe not a temp workaround
-	t = 0
-	for i in range(len(r)-1):
-		t = t+r[i][0]
-		r[i][0] = int(t)
-	return r
 
 def normalize(r):
 	max_time = 0
@@ -60,10 +41,8 @@ def normalize(r):
 	for i in range(len(r)):
 		for t in range(len(r[i])):
 			if r[i][t][0] > max_time:
-				print "max_time", max_time, "r[i][t][0]", r[i][t][0]
 			r[i][t][0] = float(r[i][t][0] / max_time)
 			r[i][t][130] = float((r[i][t][130]-min_tempo)/(max_tempo-min_tempo))
-			#print r[i][t][130]
 
 	return r, max_time, max_tempo, min_tempo
 
@@ -107,7 +86,6 @@ def create_dataset(norm=True):
 	files = listdir("music/")
 	for i in files:
 		songs.append(parse_midi.parse("music/"+i))
-		#songs.append(to_rel_timesteps(parse_midi.parse("music/"+i)))
 	if norm:
 		return normalize(songs)
 	else:
@@ -131,9 +109,7 @@ def to_midi(r, norm=True, max_time=0, max_tempo=0, min_tempo=0):
 	return mid
 
 songs, max_time, max_tempo, min_tempo = create_dataset()
-#songs = create_dataset()
 
-#songs = create_dataset(norm=True)
 max_len = 0
 for i in range(len(songs)):
 	if len(songs[i]) > max_len:
@@ -147,7 +123,6 @@ for o in range(len(songs)):
 		for th in range(len(songs[o][t])):
 			#y[o, t, th] = songs[o][t][th]
 			y[o, t, th] = float(songs[o][t][th])#TODO Normalize
-
 """
 
 #A test
@@ -163,6 +138,3 @@ for o in range(len(songs)):
 
 
 print x.shape
-
-
-#model.save_weights("model", overwrite=True)
