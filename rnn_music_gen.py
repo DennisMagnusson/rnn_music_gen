@@ -64,7 +64,8 @@ def normalize(r):
 			r[i][t][0] = float(r[i][t][0] / max_time)
 			r[i][t][130] = float((r[i][t][130]-min_tempo)/(max_tempo-min_tempo))
 			#print r[i][t][130]
-	return r, max_time, max_tempo, min_tempo	
+
+	return r, max_time, max_tempo, min_tempo
 
 def remove_duplicates(r):
 	#for i in range(1, len(r)):
