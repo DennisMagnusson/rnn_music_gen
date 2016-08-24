@@ -40,7 +40,6 @@ def normalize(r):
 
 	for i in range(len(r)):
 		for t in range(len(r[i])):
-			if r[i][t][0] > max_time:
 			r[i][t][0] = float(r[i][t][0] / max_time)
 			r[i][t][130] = float((r[i][t][130]-min_tempo)/(max_tempo-min_tempo))
 
@@ -75,8 +74,7 @@ def denormalize(r, max_time, max_tempo, min_tempo):
 def create_model(loss='mean_squared_error'):
 	model = Sequential()
 	model.add(LSTM(256, return_sequences=True, input_shape=x.shape[1:]))
-	#model.add(Dropout(0.6))
-	model.add(Dropout(0))#Just a test TODO
+	model.add(Dropout(0.6))
 	model.add(LSTM(131, return_sequences=True))
 	model.compile(loss=loss, optimizer='rmsprop')#Works
 	return model
