@@ -99,7 +99,6 @@ def to_midi(r, norm=True, max_time=0, max_tempo=0, min_tempo=0):
 	l = l[0]
 	if norm:
 		l = denormalize(l, max_time, max_tempo, min_tempo)
-	l = to_abs_timesteps(l)
 	for i in range(len(l)):
 		for k in range(len(l[i])):
 			l[i][k] = int(l[i][k])
