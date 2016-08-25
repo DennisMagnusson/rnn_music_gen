@@ -31,6 +31,8 @@ def expand(r):
 	while i < len(r):#Infinite loop
 		if nonzero(r[i]) > 2:
 			time = r[i][0]
+			if time > 2000:
+				time = 2000
 			for u in range(1, len(r[i])):
 				if r[i][u] != 0:
 					arr = [0]*len(r[i])
@@ -58,16 +60,31 @@ def anti_fix(r):#AKA re-fuck up
 					if u >= len(r):
 						print "Shouldn't happen"#Note has no end
 						break
-					if r[u][i] == a:
+					#if r[u][i] == a:Removed to prevent long, varied tones
+					if r[u][i] != 0:
 						r[u][i] = 0
-					elif r[u][i] == 0:
+					#elif r[u][i] == 0:
+					else:
 						r[u][i] = -1
 						break
 			u = u+1
 
 	return r	
 
-			
+def remove_pauses(m):#Removes consecutive SetTempoEvents
+	print "Starting"
+	#for i in range(len(m)):
+	i = 0
+	while True:
+		if i >= len(m):
+			break
+		if type(m[i]) == midi.SetTempoEvent:
+			if type(m[i+1]) == midi.SetTempoEvent:
+				print "popped"
+				m.pop(i)
+				i = i-1
+		i = i+1
+	return m
 
 def generate(r):
 	r = expand(anti_fix(r))
@@ -95,12 +112,12 @@ def generate(r):
 	track.insert(0, midi.KeySignatureEvent())
 	track.insert(0, midi.TimeSignatureEvent(data=[3, 3, 12, 8]))#Change in future
 
-	track.insert(0, midi.TextMetaEvent(tick=0, text='bdca426d104a26ac9dcb070447587523', data=[98, 100, 99, 97, 52, 50, 54, 100, 49, 48, 52, 97, 50, 54, 97, 99, 57, 100, 99, 98, 48, 55, 48, 52, 52, 55, 53, 56, 55, 53, 50, 51]))#wtf?
 	track.insert(0, midi.ControlChangeEvent(data=[91, 127]))
 	track.insert(0, midi.ControlChangeEvent(data=[10, 64]))
 	track.insert(0, midi.ControlChangeEvent(data=[7, 100]))
 	track.insert(0, midi.ProgramChangeEvent())	
 	track.append(midi.EndOfTrackEvent())
+	track = remove_pauses(track)
 	track = midi.Track(track)
 	mid = midi.Pattern(format=1, resolution=480, tracks=[track])
 	print "Fucking neato"

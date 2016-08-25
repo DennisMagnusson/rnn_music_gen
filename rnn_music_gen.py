@@ -73,8 +73,10 @@ def denormalize(r, max_time, max_tempo, min_tempo):
 
 def create_model(loss='mean_squared_error'):
 	model = Sequential()
-	model.add(LSTM(256, return_sequences=True, input_shape=x.shape[1:]))
+	model.add(LSTM(512, return_sequences=True, input_shape=x.shape[1:]))
 	model.add(Dropout(0.6))
+	#model.add(LSTM(512, return_sequences=True))
+	#model.add(Dropout(0.4))
 	model.add(LSTM(131, return_sequences=True))
 	model.compile(loss=loss, optimizer='rmsprop')#Works
 	return model
@@ -98,10 +100,7 @@ def to_midi(r, norm=True, max_time=0, max_tempo=0, min_tempo=0):
 	l = r.tolist()
 	l = l[0]
 	if norm:
-		l = denormalize(l, max_time, max_tempo, min_tempo)
-	for i in range(len(l)):
-		for k in range(len(l[i])):
-			l[i][k] = int(l[i][k])
+		l = denormalize(l, max_time=max_time, max_tempo=max_tempo, min_tempo=min_tempo)
 	mid = generate_midi.generate(l)
 	return mid
 
