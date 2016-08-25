@@ -31,6 +31,10 @@ def expand(r):
 	while i < len(r):#Infinite loop
 		if nonzero(r[i]) > 2:
 			time = r[i][0]
+			if time > 5000:
+				#End the song here
+				r = r[0:i]
+				break
 			if time > 2000:
 				time = 2000
 			for u in range(1, len(r[i])):
