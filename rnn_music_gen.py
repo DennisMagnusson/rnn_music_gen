@@ -72,6 +72,19 @@ def denormalize(r, max_time, max_tempo, min_tempo):
 	return r
 
 def create_model(loss='mean_squared_error'):
+
+	"""
+	#The super awesome new and improved one
+	l = int(x.shape[1])
+	model = Sequential()
+	model.add(LSTM(512, return_sequences=True, input_dim=131, forget_bias_init='one', activation="tanh", dropout_U=0.4))
+	model.add(Dropout(0))
+	model.add(LSTM(131, return_sequences=False, forget_bias_init='one', activation="tanh"))
+	model.compile(loss=loss, optimizer='rmsprop')#Works
+	"""
+	
+	
+	#OLD ONE
 	l = int(x.shape[1])
 	model = Sequential()
 	model.add(LSTM(512, return_sequences=True, input_shape=x.shape[1:], forget_bias_init='one', activation="tanh", dropout_U=0.4))
@@ -81,6 +94,7 @@ def create_model(loss='mean_squared_error'):
 	#model.add(Dropout(0.4))
 	model.add(LSTM(131, return_sequences=True, forget_bias_init='one', activation="tanh"))
 	model.compile(loss=loss, optimizer='rmsprop')#Works
+	
 	return model
 
 def create_dataset(norm=True):
@@ -107,7 +121,18 @@ def to_midi(r, norm=True, max_time=0, max_tempo=0, min_tempo=0):
 	return mid
 
 songs, max_time, max_tempo, min_tempo = create_dataset()
+"""
+#The cool, new shizzz
+x = []
+y = []
 
+for i in range(len(songs)):
+	for u in range(len(songs[i])-1):
+		x.append(songs[i][0:u])
+		y.append(songs[i][u+1])
+
+"""
+##############################OLD STUFF, remove when done
 max_len = 0
 for i in range(len(songs)):
 	if len(songs[i]) > max_len:
@@ -120,9 +145,7 @@ y = np.zeros((len(songs), max_len+1, 131), dtype=float)
 for o in range(len(songs)):
 	for t in range(len(songs[o])):
 		for th in range(len(songs[o][t])):
-			#x[o, t, th] = float(songs[o][t][th])
-			#y[o, t+1, th] = float(songs[o][t][th])#TODO Normalize... or not
-			x[o, t+1, th] = float(songs[o][t][th])#Oh for fucks sake which is it?TODO
-			y[o, t, th] = float(songs[o][t][th])#TODO Normalize... or not
+			x[o, t+1, th] = float(songs[o][t][th])
+			y[o, t, th] = float(songs[o][t][th])
 
 print x.shape
