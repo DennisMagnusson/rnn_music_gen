@@ -12,7 +12,7 @@ from os import listdir
 import math
 
 from keras.models import Sequential
-from keras.layers import Recurrent, LSTM
+from keras.layers import Recurrent, LSTM, GRU
 from keras.layers.core import Dense, Dropout, Activation, Masking
 from keras.layers.embeddings import Embedding
 
@@ -72,12 +72,14 @@ def denormalize(r, max_time, max_tempo, min_tempo):
 	return r
 
 def create_model(loss='mean_squared_error'):
+	l = int(x.shape[1])
 	model = Sequential()
-	model.add(LSTM(512, return_sequences=True, input_shape=x.shape[1:]))
-	model.add(Dropout(0.6))
+	model.add(LSTM(512, return_sequences=True, input_shape=x.shape[1:], forget_bias_init='one', activation="tanh", dropout_U=0.4))
+	#model.add(Dropout(0.6))#JUST A TEST
+	model.add(Dropout(0))
 	#model.add(LSTM(512, return_sequences=True))
 	#model.add(Dropout(0.4))
-	model.add(LSTM(131, return_sequences=True))
+	model.add(LSTM(131, return_sequences=True, forget_bias_init='one', activation="tanh"))
 	model.compile(loss=loss, optimizer='rmsprop')#Works
 	return model
 
