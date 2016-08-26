@@ -8,7 +8,7 @@ ControlChangeEvent data=[64, 127 or 0] is pedal
 Matrix structure:
 0 = time
 1-128 notes pressed (velocity)
-129 pedale pressed  (bool)
+129 pedale pressed  (Binary)
 130 tempo from settempoevent
 """
 
@@ -23,8 +23,7 @@ def compress(r):
 	i = 1
 	while i < len(r):
 		if r[i][0] == r[i-1][0]:#If time is equal
-			#for u in range(1, len(r[1])):
-			for u in range(1, 131):#This is prop less confusing
+			for u in range(1, 131):
 				if r[i][u] != 0 and r[i-1][u] == 0:
 					r[i-1][u] = r[i][u]
 			r.pop(i)

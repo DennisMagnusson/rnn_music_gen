@@ -46,7 +46,6 @@ def normalize(r):
 	return r, max_time, max_tempo, min_tempo
 
 def remove_duplicates(r):
-	#for i in range(1, len(r)):
 	i = 1
 	while i < len(r):
 		if r[i] == r[i-1]:
@@ -80,7 +79,7 @@ def create_model(loss='mean_squared_error'):
 	model.add(LSTM(512, return_sequences=True, input_dim=131, forget_bias_init='one', activation="tanh", dropout_U=0.4))
 	model.add(Dropout(0))
 	model.add(LSTM(131, return_sequences=False, forget_bias_init='one', activation="tanh"))
-	model.compile(loss=loss, optimizer='rmsprop')#Works
+	model.compile(loss=loss, optimizer='rmsprop')
 	"""
 	
 	
@@ -93,7 +92,7 @@ def create_model(loss='mean_squared_error'):
 	#model.add(LSTM(512, return_sequences=True))
 	#model.add(Dropout(0.4))
 	model.add(LSTM(131, return_sequences=True, forget_bias_init='one', activation="tanh"))
-	model.compile(loss=loss, optimizer='rmsprop')#Works
+	model.compile(loss=loss, optimizer='rmsprop')
 	
 	return model
 

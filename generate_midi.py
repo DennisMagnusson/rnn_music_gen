@@ -23,10 +23,6 @@ def to_base_256(i):
 	return r
 
 def expand(r):
-	#TODO test
-	#FIXME Something wrong with tempo. Ticks are wrong
-	#Wrong in the conversion? Or just the order of things?
-	#for i in range(len(r)):
 	i = 0
 	while i < len(r):#Infinite loop
 		if nonzero(r[i]) > 2:
@@ -77,7 +73,6 @@ def anti_fix(r):#AKA re-fuck up
 
 def remove_pauses(m):#Removes consecutive SetTempoEvents
 	print "Starting"
-	#for i in range(len(m)):
 	i = 0
 	while True:
 		if i >= len(m):
@@ -97,8 +92,6 @@ def generate(r):
 	melody = []
 	track = []
 	for i in r:
-		#if last_tempo == i[130]:
-
 		n = nonzero_index(i)
 		t = i[0]
 		#TODO Fix for the -1 stuff
