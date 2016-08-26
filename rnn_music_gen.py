@@ -106,11 +106,6 @@ def create_dataset(norm=True):
 	else:
 		return songs
 
-def generate_x(x):
-	x = x[0]
-	x = x.reshape(1, 4381, 131)
-	return x
-
 def to_midi(r, norm=True, max_time=0, max_tempo=0, min_tempo=0):
 	l = r.tolist()
 	l = l[0]
