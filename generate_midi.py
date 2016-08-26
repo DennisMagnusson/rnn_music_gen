@@ -84,7 +84,6 @@ def remove_pauses(m):#Removes consecutive SetTempoEvents
 			break
 		if type(m[i]) == midi.SetTempoEvent:
 			if type(m[i+1]) == midi.SetTempoEvent:
-				print "popped"
 				m.pop(i)
 				i = i-1
 		i = i+1

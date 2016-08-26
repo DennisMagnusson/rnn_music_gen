@@ -112,16 +112,7 @@ max_len = 0
 for i in range(len(songs)):
 	if len(songs[i]) > max_len:
 		max_len = len(songs[i])
-"""
-the old one, where x is an empty arr of zeros.
-x = np.zeros((len(songs), max_len, 131), dtype=float)
-y = np.zeros((len(songs), max_len, 131), dtype=float)
-for o in range(len(songs)):
-	for t in range(len(songs[o])):
-		for th in range(len(songs[o][t])):
-			#y[o, t, th] = songs[o][t][th]
-			y[o, t, th] = float(songs[o][t][th])#TODO Normalize
-"""
+
 
 #A test
 x = np.zeros((len(songs), max_len+1, 131), dtype=float)
@@ -133,6 +124,5 @@ for o in range(len(songs)):
 			#y[o, t+1, th] = float(songs[o][t][th])#TODO Normalize... or not
 			x[o, t+1, th] = float(songs[o][t][th])#Oh for fucks sake which is it?TODO
 			y[o, t, th] = float(songs[o][t][th])#TODO Normalize... or not
-
 
 print x.shape
