@@ -1,6 +1,5 @@
 from __future__ import division
-"""
-"""
+
 import parse_midi
 import generate_midi
 
@@ -72,18 +71,15 @@ def denormalize(r, max_time, max_tempo, min_tempo):
 	return r
 
 def create_model(loss='mean_squared_error'):
-
-	"""
 	#The super awesome new and improved one
-	l = int(x.shape[1])
+	#l = int(x.shape[1])
 	model = Sequential()
-	model.add(LSTM(512, return_sequences=True, input_dim=131, forget_bias_init='one', activation="tanh", dropout_U=0.4))
+	model.add(LSTM(256, return_sequences=True, input_dim=131, forget_bias_init='one', activation="tanh", dropout_U=0.4))
 	model.add(Dropout(0))
 	model.add(LSTM(131, return_sequences=False, forget_bias_init='one', activation="tanh"))
 	model.compile(loss=loss, optimizer='rmsprop')
-	"""
 	
-	
+	"""	
 	#OLD ONE
 	l = int(x.shape[1])
 	model = Sequential()
@@ -94,7 +90,7 @@ def create_model(loss='mean_squared_error'):
 	#model.add(Dropout(0.4))
 	model.add(LSTM(131, return_sequences=True, forget_bias_init='one', activation="tanh"))
 	model.compile(loss=loss, optimizer='rmsprop')
-	
+	"""	
 	return model
 
 def create_dataset(norm=True):
@@ -115,18 +111,55 @@ def to_midi(r, norm=True, max_time=0, max_tempo=0, min_tempo=0):
 	mid = generate_midi.generate(l)
 	return mid
 
+def predict(x, model):#With the new, badass way of doing things
+	r = x#Fill with something
+	for i in range(10000):
+		nxt = model.predict(r)
+		if nxt == [0]*131:
+			return r
+		r.append(model.predict(r))
+
+	return r
+
 songs, max_time, max_tempo, min_tempo = create_dataset()
-"""
+
 #The cool, new shizzz
-x = []
-y = []
+model = create_model()
+max_len = 0#Maybe use if necessary
+delta = 5
 
-for i in range(len(songs)):
-	for u in range(len(songs[i])-1):
-		x.append(songs[i][0:u])
-		y.append(songs[i][u+1])
+for s in songs:
+
+	x = []
+	y = []
+	o = 0
+	for u in range(1, len(s)-1, delta):#Taking some steps to reduce memory
+		o += 1
+		l = []
+		for k in range(u):
+			l.append(s[k])#TODO Length is fucked up.
+
+		x.append(l)
+		y.append(i[u+1])
+		
+	x = np.array(x)
+	y = np.array(y)
+	#x = x.reshape((x.shape[0]/131, None, 131))
+	#y = y.reshape((y.shape[0]/131, 131))
+	print x.shape #Should be 3d
+	print y.shape
+	model.train_on_batch(x, y)
+	#model.fit(x, y, batch_size=128, nb_epoch=1, verbose=1)
+	#x = np.array([], dtype=np.float16)
+	#y = np.array([], dtype=np.float16)
+print "done"
+
+
 
 """
+#x = np.array(x)
+#y = np.array(x)
+
 ##############################OLD STUFF, remove when done
 max_len = 0
 for i in range(len(songs)):
@@ -142,5 +175,6 @@ for o in range(len(songs)):
 		for th in range(len(songs[o][t])):
 			x[o, t+1, th] = float(songs[o][t][th])
 			y[o, t, th] = float(songs[o][t][th])
-
-print x.shape
+print "x.shape", x.shape
+print "y.shape", y.shape
+"""
