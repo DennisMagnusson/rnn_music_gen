@@ -128,6 +128,9 @@ model = create_model()
 max_len = 0#Maybe use if necessary
 delta = 5
 
+#TODO: Something seems to be wrong with the datatypes
+#Or maybe still the fking lengths
+
 for s in songs:
 
 	x = []
@@ -137,13 +140,16 @@ for s in songs:
 		o += 1
 		l = []
 		for k in range(u):
+			#if len(s[k]) == 131:
 			l.append(s[k])#TODO Length is fucked up.
 
 		x.append(l)
-		y.append(i[u+1])
+		y.append(s[u+1])
 		
-	x = np.array(x)
-	y = np.array(y)
+	#x = np.array(x, ndmin=3, dtype=np.float16)#Maybe change to FP32
+	x = np.array(x, ndmin=3)#Maybe change to FP32
+
+	y = np.array(y, dtype=np.float16)
 	#x = x.reshape((x.shape[0]/131, None, 131))
 	#y = y.reshape((y.shape[0]/131, 131))
 	print x.shape #Should be 3d
