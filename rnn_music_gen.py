@@ -164,8 +164,12 @@ for s in songs:
 	#model.fit(x, y, batch_size=128, nb_epoch=1, verbose=1)
 """
 #Giving #2 a try.
-maxlen=5000
-for i in range(1, maxlen, delta):
+maxlen = 0
+for s in songs:
+	if len(s) > maxlen:
+		maxlen = len(s)
+
+for i in range(1, maxlen-1, delta):
 	x = []
 	y = []
 	for s in songs:
