@@ -16,6 +16,12 @@ from keras.layers import Recurrent, LSTM, GRU
 from keras.layers.core import Dense, Dropout, Activation, Masking
 #from keras.layers.embeddings import Embedding
 
+"""
+Okay, so the songs are empty. That's a problem. Could it be due to problems with np.reshape?
+Likely, have a look into it.
+
+"""
+
 def to_dataset(r):
 	m = 0
 	for i in range(len(r)):
@@ -103,6 +109,16 @@ def create_dataset(norm=True):
 	else:
 		return songs
 
+def filter_data(songs, size):#Reomves songs over a specific size
+	i = 0
+	while i < len(songs):
+		if len(songs[i]) > size:
+			songs.pop(i)
+			i -= 1
+		i += 1
+
+	return songs
+
 def to_midi(r, norm=True, max_time=0, max_tempo=0, min_tempo=0):
 	l = r.tolist()
 	l = l[0]
@@ -111,22 +127,56 @@ def to_midi(r, norm=True, max_time=0, max_tempo=0, min_tempo=0):
 	mid = generate_midi.generate(l)
 	return mid
 
-def predict(x, model):#With the new, badass way of doing things
+def clamp(r):#Some weird behaviour here, there are still negative numbers
+	r = r.tolist()	
+	for k in range(131):
+		if l[k] < 10/127:
+			l[k] = 0.0
+	return np.array(r)
+	
+				
+
+def predict(x, model, length=1000):#With the new, badass way of doing things
 	r = x#Fill with something
-	for i in range(10000):
-		nxt = model.predict(r)
-		if nxt == [0]*131:
-			return r
-		r.append(model.predict(r))
+	#TODO Replace x with tempo. Fill rest with zeros
+	for i in range(length):
+		r = r.reshape(1, i+1, 131)
+		nxt = clamp(model.predict(r))
+		#if nxt == [0]*131:
+			#return r
+		r = np.append(r, nxt)
+		#r.append(model.predict(r))
 
 	return r
 
+def train(model, songs, delta=5):
+	maxlen = 0
+	for s in songs:
+		if len(s) > maxlen:
+			maxlen = len(s)
+
+	for i in range(1, maxlen-1, delta):
+		x = []
+		y = []
+		for s in songs:
+			if(len(s) <= i+1): continue
+			#for k in range(i+1):
+				#x.append(s[k])
+			x.append(s[0:i])
+			y.append(s[i+1])
+		if(len(x) == 0): return
+		x = np.array(x)
+		y = np.array(y)
+		print x.shape
+		model.train_on_batch(x, y)
+
+	print "done"
+
+
 songs, max_time, max_tempo, min_tempo = create_dataset()
+#model = create_model()
 
 #The cool, new shizzz
-model = create_model()
-max_len = 0#Maybe use if necessary
-delta = 5
 
 #TODO: Something seems to be wrong with the datatypes
 #Okay, I got this: Since the lengths are varying dtype=list
@@ -162,7 +212,7 @@ for s in songs:
 	print y.shape
 	model.train_on_batch(x, y)
 	#model.fit(x, y, batch_size=128, nb_epoch=1, verbose=1)
-"""
+
 #Giving #2 a try.
 maxlen = 0
 for s in songs:
@@ -178,15 +228,13 @@ for i in range(1, maxlen-1, delta):
 			#x.append(s[k])
 		x.append(s[0:i])
 		y.append(s[i+1])
-	print "yay?"	
 	x = np.array(x)
 	y = np.array(y)
-	print "yay!"
+	print x.shape
 	model.train_on_batch(x, y)
-	print "Trained once"
 
 print "done"
-
+"""
 
 """
 #x = np.array(x)
