@@ -4,7 +4,7 @@ import parse_midi
 import generate_midi
 
 import numpy as np
-from sklearn import preprocessing
+#from sklearn import preprocessing
 import h5py
 
 from os import listdir
@@ -14,7 +14,7 @@ import math
 from keras.models import Sequential
 from keras.layers import Recurrent, LSTM, GRU
 from keras.layers.core import Dense, Dropout, Activation, Masking
-from keras.layers.embeddings import Embedding
+#from keras.layers.embeddings import Embedding
 
 def to_dataset(r):
 	m = 0
@@ -129,26 +129,32 @@ max_len = 0#Maybe use if necessary
 delta = 5
 
 #TODO: Something seems to be wrong with the datatypes
-#Or maybe still the fking lengths
-
+#Okay, I got this: Since the lengths are varying dtype=list
+#That's why it is 2d
+#How to fix?
+#	1. np.zeros (not a good idea)
+#	2. train all songs at t=whatever (might work, but harder on the processing)
+#	
+"""
+#This is the old method
 for s in songs:
-
+	#Make a np array and fill it with other arrays
 	x = []
 	y = []
-	o = 0
 	for u in range(1, len(s)-1, delta):#Taking some steps to reduce memory
-		o += 1
 		l = []
-		for k in range(u):
-			#if len(s[k]) == 131:
+		for k in range(u+1):#Should it be +1 or not?
 			l.append(s[k])#TODO Length is fucked up.
-
+		#tmp = np.array(l)
 		x.append(l)
+		#tmp = np.array(x)
 		y.append(s[u+1])
 		
-	#x = np.array(x, ndmin=3, dtype=np.float16)#Maybe change to FP32
-	x = np.array(x, ndmin=3)#Maybe change to FP32
-
+	#x = np.array(x, ndmin=3, dtype=np.float32)#Maybe change to FP16
+	#print x
+	#x = np.array(x, ndmin=3)#Maybe change to FP32
+	#x = np.asfarray(x)#Maybe change to FP32
+	x = np.asfortranarray(x)
 	y = np.array(y, dtype=np.float16)
 	#x = x.reshape((x.shape[0]/131, None, 131))
 	#y = y.reshape((y.shape[0]/131, 131))
@@ -156,10 +162,26 @@ for s in songs:
 	print y.shape
 	model.train_on_batch(x, y)
 	#model.fit(x, y, batch_size=128, nb_epoch=1, verbose=1)
-	#x = np.array([], dtype=np.float16)
-	#y = np.array([], dtype=np.float16)
-print "done"
+"""
+#Giving #2 a try.
+maxlen=5000
+for i in range(1, maxlen, delta):
+	x = []
+	y = []
+	for s in songs:
+		if(len(s) < i): continue
+		#for k in range(i+1):
+			#x.append(s[k])
+		x.append(s[0:i])
+		y.append(s[i+1])
+	print "yay?"	
+	x = np.array(x)
+	y = np.array(y)
+	print "yay!"
+	model.train_on_batch(x, y)
+	print "Trained once"
 
+print "done"
 
 
 """
