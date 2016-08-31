@@ -20,6 +20,8 @@ from keras.layers.core import Dense, Dropout, Activation, Masking
 Okay, so the songs are empty. That's a problem. Could it be due to problems with np.reshape?
 Likely, have a look into it.
 
+Could also be in the training.
+Maybe print those arrays and have a look.
 """
 
 def to_dataset(r):
