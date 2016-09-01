@@ -14,7 +14,7 @@ import math
 from keras.models import Sequential
 from keras.layers import Recurrent, LSTM, GRU
 from keras.layers.core import Dense, Dropout, Activation, Masking
-from keras.layers.advanced.activations import SReLU, ThreshholdedReLU
+from keras.layers.advanced_activations import SReLU, ThresholdedReLU
 #from keras.layers.embeddings import Embedding
 
 """
@@ -90,8 +90,9 @@ def create_model(loss='mean_squared_error'):
 	model.add(LSTM(131, return_sequences=False, forget_bias_init='one', activation="tanh"))
 	#Add a Dense layer with ReLU?
 	model.add(Dense(131))#Change to threashholded ReLU or SReLU
-	model.add(Activation(ThresholdedReLU(theta=10/127))
-	model.compile(loss=loss, optimizer='rmsprop')
+	model.add(Activation(ThresholdedReLU(theta=0.1)))
+	#model.compile(loss=loss, optimizer='rmsprop')
+	model.compile(loss=loss, optimizer="sgd")
 	
 	"""	
 	#OLD ONE
@@ -148,7 +149,8 @@ def predict(x, model, length=1000):#With the new, badass way of doing things
 	#TODO Replace x with tempo. Fill rest with zeros. Maybe
 	for i in range(length):
 		x = x.reshape(1, i+1, 131)
-		nxt = clamp(model.predict(x))
+		#nxt = clamp(model.predict(x))
+		nxt = model.predict(x)
 		#if nxt == [0]*131:
 			#return r
 		x = np.append(x, nxt)
