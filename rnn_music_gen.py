@@ -79,7 +79,7 @@ def denormalize(r, max_time, max_tempo, min_tempo):
 	r = remove_duplicates(r)
 	return r
 
-def create_model(loss='mean_squared_error'):
+def create_model(loss='mean_squared_error', optimizer='sgd'):
 	#The super awesome new and improved one
 	#l = int(x.shape[1])
 	model = Sequential()
@@ -92,7 +92,7 @@ def create_model(loss='mean_squared_error'):
 	model.add(Dense(131))#Change to threashholded ReLU or SReLU
 	model.add(Activation(ThresholdedReLU(theta=0.1)))
 	#model.compile(loss=loss, optimizer='rmsprop')
-	model.compile(loss=loss, optimizer="sgd")
+	model.compile(loss=loss, optimizer=optimizer)
 	
 	"""	
 	#OLD ONE
@@ -152,11 +152,11 @@ def predict(x, model, length=1000):#With the new, badass way of doing things
 		#nxt = clamp(model.predict(x))
 		nxt = model.predict(x)
 		#if nxt == [0]*131:
-			#return r
+			#return x
 		x = np.append(x, nxt)
 		#r.append(model.predict(r))
 
-	return r
+	return x
 
 def train(model, songs, delta=5):
 	maxlen = 0
