@@ -14,6 +14,7 @@ import math
 from keras.models import Sequential
 from keras.layers import Recurrent, LSTM, GRU
 from keras.layers.core import Dense, Dropout, Activation, Masking
+from keras.layers.advanced.activations import SReLU, ThreshholdedReLU
 #from keras.layers.embeddings import Embedding
 
 """
@@ -82,9 +83,14 @@ def create_model(loss='mean_squared_error'):
 	#The super awesome new and improved one
 	#l = int(x.shape[1])
 	model = Sequential()
-	model.add(LSTM(256, return_sequences=True, input_dim=131, forget_bias_init='one', activation="tanh", dropout_U=0.4))
+	#model.add(LSTM(256, return_sequences=True, input_dim=131, forget_bias_init='one', activation="tanh", dropout_U=0.4))
+	model.add(LSTM(256, return_sequences=True, input_dim=131, forget_bias_init='one', activation="tanh", dropout_U=0.3))
+
 	model.add(Dropout(0))
 	model.add(LSTM(131, return_sequences=False, forget_bias_init='one', activation="tanh"))
+	#Add a Dense layer with ReLU?
+	model.add(Dense(131))#Change to threashholded ReLU or SReLU
+	model.add(Activation(ThresholdedReLU(theta=10/127))
 	model.compile(loss=loss, optimizer='rmsprop')
 	
 	"""	
@@ -130,23 +136,22 @@ def to_midi(r, norm=True, max_time=0, max_tempo=0, min_tempo=0):
 	return mid
 
 def clamp(r):#Some weird behaviour here, there are still negative numbers
-	r = r.tolist()	
+	r = r.tolist()
 	for k in range(131):
 		if l[k] < 10/127:
 			l[k] = 0.0
 	return np.array(r)
 	
-				
 
 def predict(x, model, length=1000):#With the new, badass way of doing things
-	r = x#Fill with something
-	#TODO Replace x with tempo. Fill rest with zeros
+	#r = x#Fill with something
+	#TODO Replace x with tempo. Fill rest with zeros. Maybe
 	for i in range(length):
-		r = r.reshape(1, i+1, 131)
-		nxt = clamp(model.predict(r))
+		x = x.reshape(1, i+1, 131)
+		nxt = clamp(model.predict(x))
 		#if nxt == [0]*131:
 			#return r
-		r = np.append(r, nxt)
+		x = np.append(x, nxt)
 		#r.append(model.predict(r))
 
 	return r
