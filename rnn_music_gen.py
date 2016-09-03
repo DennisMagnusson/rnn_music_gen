@@ -79,7 +79,7 @@ def denormalize(r, max_time, max_tempo, min_tempo):
 	r = remove_duplicates(r)
 	return r
 
-def create_model(loss='mean_squared_error', optimizer='sgd'):
+def create_model(loss='categorical_crossentropy', optimizer='sgd'):
 	#The super awesome new and improved one
 	#l = int(x.shape[1])
 	model = Sequential()
@@ -140,6 +140,7 @@ def to_midi(r, norm=True, max_time=0, max_tempo=0, min_tempo=0):
 
 def clamp(r):#Some weird behaviour here, there are still negative numbers
 	r = r.tolist()
+	r = r[0]
 	for k in range(1, 129):
 		if r[k] < 10.0/127.0:
 			r[k] = 0.0
@@ -152,7 +153,7 @@ def predict(x, model, length=1000):#With the new, badass way of doing things
 	for i in range(length):
 		x = x.reshape(1, i+1, 131)
 		#nxt = clamp(model.predict(x))
-		nxt = model.predict(x)
+		nxt = clamp(model.predict(x))
 		#if nxt == [0]*131:
 			#return x
 		x = np.append(x, nxt)
