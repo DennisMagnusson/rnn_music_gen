@@ -112,7 +112,7 @@ def create_dataset(norm=True, size=999999):
 	songs = []
 	files = listdir("music/")
 	for i in files:
-		s = parse_midi.parse("music/"+i))
+		s = parse_midi.parse("music/"+i)
 		if len(s) <= size:
 			songs.append(s)
 	if norm:
