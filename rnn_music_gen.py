@@ -89,8 +89,8 @@ def create_model(loss='mean_squared_error', optimizer='sgd'):
 	model.add(Dropout(0))
 	model.add(LSTM(131, return_sequences=False, forget_bias_init='one', activation="tanh"))
 	#Add a Dense layer with ReLU?
-	model.add(Dense(131))#Change to threashholded ReLU or SReLU
-	model.add(Activation(ThresholdedReLU(theta=0.1)))
+	model.add(Dense(131, activation="sigmoid"))#Change to threashholded ReLU or SReLU
+	#model.add(Activation(ThresholdedReLU(theta=0.1)))
 	#model.compile(loss=loss, optimizer='rmsprop')
 	model.compile(loss=loss, optimizer=optimizer)
 	
@@ -108,11 +108,13 @@ def create_model(loss='mean_squared_error', optimizer='sgd'):
 	"""	
 	return model
 
-def create_dataset(norm=True):
+def create_dataset(norm=True, size=999999):
 	songs = []
 	files = listdir("music/")
 	for i in files:
-		songs.append(parse_midi.parse("music/"+i))
+		s = parse_midi.parse("music/"+i))
+		if len(s) <= size:
+			songs.append(s)
 	if norm:
 		return normalize(songs)
 	else:
@@ -138,9 +140,9 @@ def to_midi(r, norm=True, max_time=0, max_tempo=0, min_tempo=0):
 
 def clamp(r):#Some weird behaviour here, there are still negative numbers
 	r = r.tolist()
-	for k in range(131):
-		if l[k] < 10/127:
-			l[k] = 0.0
+	for k in range(1, 129):
+		if r[k] < 10.0/127.0:
+			r[k] = 0.0
 	return np.array(r)
 	
 
@@ -182,7 +184,7 @@ def train(model, songs, delta=5):
 	print "done"
 
 
-songs, max_time, max_tempo, min_tempo = create_dataset()
+#songs, max_time, max_tempo, min_tempo = create_dataset()
 #model = create_model()
 
 #The cool, new shizzz
