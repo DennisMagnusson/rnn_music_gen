@@ -79,7 +79,7 @@ def denormalize(r, max_time, max_tempo, min_tempo):
 	r = remove_duplicates(r)
 	return r
 
-def create_model(loss='categorical_crossentropy', optimizer='sgd'):
+def create_model(loss='categorical_crossentropy', optimizer='rmsprop'):
 	#The super awesome new and improved one
 	#l = int(x.shape[1])
 	model = Sequential()
@@ -89,7 +89,10 @@ def create_model(loss='categorical_crossentropy', optimizer='sgd'):
 	model.add(Dropout(0))
 	model.add(LSTM(131, return_sequences=False, forget_bias_init='one', activation="tanh"))
 	#Add a Dense layer with ReLU?
-	model.add(Dense(131, activation="sigmoid"))#Change to threashholded ReLU or SReLU
+	#model.add(Dense(131, activation="sigmoid"))#Change to threashholded ReLU or SReLU
+	#model.add(Dense(131, activation="relu"))
+	model.add(Dense(131, activation="softmax"))
+	model.add(Dense(131, activation="sigmoid"))
 	#model.add(Activation(ThresholdedReLU(theta=0.1)))
 	#model.compile(loss=loss, optimizer='rmsprop')
 	model.compile(loss=loss, optimizer=optimizer)
@@ -144,19 +147,23 @@ def clamp(r):#Some weird behaviour here, there are still negative numbers
 	for k in range(1, 129):
 		if r[k] < 10.0/127.0:
 			r[k] = 0.0
+		if r[k] > 1.0:
+			r[k] = 1.0
 	return np.array(r)
 	
 
-def predict(x, model, length=1000):#With the new, badass way of doing things
+def predict(x, model, length=1000, clmp=True):#With the new, badass way of doing things
 	#r = x#Fill with something
 	#TODO Replace x with tempo. Fill rest with zeros. Maybe
 	for i in range(length):
-		x = x.reshape(1, i+1, 131)
 		#nxt = clamp(model.predict(x))
-		nxt = clamp(model.predict(x))
+		nxt = model.predict(x)
+		if clmp:
+			nxt = clamp(nxt)
 		#if nxt == [0]*131:
 			#return x
 		x = np.append(x, nxt)
+		x = x.reshape(1, i+2, 131)
 		#r.append(model.predict(r))
 
 	return x
