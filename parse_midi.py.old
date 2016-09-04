@@ -60,13 +60,13 @@ def parse(filename):
 	for u in range(len(p)):
 		for i in range(len(p[u])):
 			if type(p[u][i]) == midi.NoteOnEvent:
+				frame = [0]*131
+				frame[0] = p[u][i].tick
 				#Velocity
 				v = p[u][i].data[1]
-				if v != 0:
-					frame = [0]*128
-					frame[p[u][i].data[0]] = 1 if v != 0 else 0 
-					r.append(frame)
-			"""
+				frame[p[u][i].data[0]+1] = v if v != 0 else -1
+				r.append(frame)
+
 			elif type(p[u][i]) == midi.ControlChangeEvent: #The Pedal
 				if p[u][i].data[0] != 64:
 					continue
@@ -82,5 +82,5 @@ def parse(filename):
 				r.append(frame)
 	
 	r = fix(r)
-	"""
+
 	return r

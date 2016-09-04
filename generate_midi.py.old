@@ -86,14 +86,8 @@ def remove_pauses(m):#Removes consecutive SetTempoEvents
 
 def generate(r):
 	r = expand(anti_fix(r))
-	track = []
-	for i in r:
-		n = nonzero_index(i)
-		t = 80
-		track.append(midi.NoteOnEvent(tick=t, data=[n, 127]))
-
+	
 	#Cycle through and create events
-	"""
 	tempo = []
 	melody = []
 	track = []
@@ -109,7 +103,7 @@ def generate(r):
 			track.append(midi.ControlChangeEvent(tick=t, data=[64, v]))
 		if n == 130:
 			track.append(midi.SetTempoEvent(tick=t, data=to_base_256(i[n])))
-		"""
+
 	#Insert other events
 	track.insert(0, midi.KeySignatureEvent())
 	track.insert(0, midi.TimeSignatureEvent(data=[3, 3, 12, 8]))#Change in future

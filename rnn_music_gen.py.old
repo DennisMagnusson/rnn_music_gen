@@ -32,16 +32,6 @@ def to_dataset(r):
 			m = len(r[i])
 	return np.zeros(len(r), m, 131)
 
-def max_index(r):
-	m = 0
-	k = 0
-	for i in range(len(r)):
-		if r[i] > m:
-			m = r[i]
-			k = i
-
-	return k
-
 def normalize(r):
 	max_time = 0
 	max_tempo = 0
@@ -89,19 +79,20 @@ def denormalize(r, max_time, max_tempo, min_tempo):
 	r = remove_duplicates(r)
 	return r
 
-def create_model(loss='binary_crossentropy', optimizer='rmsprop'):
+def create_model(loss='categorical_crossentropy', optimizer='rmsprop'):
 	#The super awesome new and improved one
 	#l = int(x.shape[1])
 	model = Sequential()
 	#model.add(LSTM(256, return_sequences=True, input_dim=131, forget_bias_init='one', activation="tanh", dropout_U=0.4))
-	model.add(LSTM(256, return_sequences=True, input_dim=128, forget_bias_init='one', activation="tanh", dropout_U=0.3))
+	model.add(LSTM(256, return_sequences=True, input_dim=131, forget_bias_init='one', activation="tanh", dropout_U=0.3))
 
 	model.add(Dropout(0))
-	model.add(LSTM(128, return_sequences=False, forget_bias_init='one', activation="tanh"))
+	model.add(LSTM(131, return_sequences=False, forget_bias_init='one', activation="tanh"))
 	#Add a Dense layer with ReLU?
 	#model.add(Dense(131, activation="sigmoid"))#Change to threashholded ReLU or SReLU
 	#model.add(Dense(131, activation="relu"))
-	model.add(Dense(128, activation="softmax"))
+	model.add(Dense(131, activation="softmax"))
+	model.add(Dense(131, activation="sigmoid"))
 	#model.add(Activation(ThresholdedReLU(theta=0.1)))
 	#model.compile(loss=loss, optimizer='rmsprop')
 	model.compile(loss=loss, optimizer=optimizer)
@@ -120,7 +111,7 @@ def create_model(loss='binary_crossentropy', optimizer='rmsprop'):
 	"""	
 	return model
 
-def create_dataset(norm=False, size=999999):#NOTE Norm = false
+def create_dataset(norm=True, size=999999):
 	songs = []
 	files = listdir("music/")
 	for i in files:
@@ -153,15 +144,11 @@ def to_midi(r, norm=True, max_time=0, max_tempo=0, min_tempo=0):
 def clamp(r):#Some weird behaviour here, there are still negative numbers
 	r = r.tolist()
 	r = r[0]
-	i = max_index(r)
-	r = [0]*128
-	r[i] = 1
-	"""for k in range(1, 129):
+	for k in range(1, 129):
 		if r[k] < 10.0/127.0:
 			r[k] = 0.0
 		if r[k] > 1.0:
 			r[k] = 1.0
-	"""
 	return np.array(r)
 	
 
@@ -176,7 +163,7 @@ def predict(x, model, length=1000, clmp=True):#With the new, badass way of doing
 		#if nxt == [0]*131:
 			#return x
 		x = np.append(x, nxt)
-		x = x.reshape(1, i+2, 128)
+		x = x.reshape(1, i+2, 131)
 		#r.append(model.predict(r))
 
 	return x
