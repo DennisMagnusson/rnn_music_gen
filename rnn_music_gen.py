@@ -15,6 +15,7 @@ from keras.models import Sequential
 from keras.layers import Recurrent, LSTM, GRU
 from keras.layers.core import Dense, Dropout, Activation, Masking
 from keras.layers.advanced_activations import SReLU, ThresholdedReLU
+from keras.optimizers import RMSprop
 #from keras.layers.embeddings import Embedding
 
 """
@@ -94,7 +95,7 @@ def denormalize(r, max_time, max_tempo, min_tempo):
 	r = remove_duplicates(r)
 	return r
 
-def create_model(loss='binary_crossentropy', optimizer='rmsprop'):
+def create_model(loss='binary_crossentropy'):#, optimizer='rmsprop'):
 	#The super awesome new and improved one
 	#l = int(x.shape[1])
 	model = Sequential()
@@ -108,6 +109,7 @@ def create_model(loss='binary_crossentropy', optimizer='rmsprop'):
 	model.add(Dense(88, activation="softmax"))
 	#model.add(Activation(ThresholdedReLU(theta=0.1)))
 	#model.compile(loss=loss, optimizer='rmsprop')
+	optimizer = RMSprop(lr=0.1)
 	model.compile(loss=loss, optimizer=optimizer)
 	
 	"""	
