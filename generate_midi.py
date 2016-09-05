@@ -85,11 +85,11 @@ def remove_pauses(m):#Removes consecutive SetTempoEvents
 	return m
 
 def generate(r):
-	r = expand(anti_fix(r))
+	#r = expand(anti_fix(r))
 	track = []
 	for i in r:
 		n = nonzero_index(i)
-		t = 80
+		t = 400
 		track.append(midi.NoteOnEvent(tick=t, data=[n, 127]))
 
 	#Cycle through and create events
@@ -119,7 +119,7 @@ def generate(r):
 	track.insert(0, midi.ControlChangeEvent(data=[7, 100]))
 	track.insert(0, midi.ProgramChangeEvent())	
 	track.append(midi.EndOfTrackEvent())
-	track = remove_pauses(track)
+	#track = remove_pauses(track)
 	track = midi.Track(track)
 	mid = midi.Pattern(format=1, resolution=480, tracks=[track])
 	print "Fucking neato"

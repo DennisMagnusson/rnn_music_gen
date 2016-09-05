@@ -32,14 +32,19 @@ def to_dataset(r):
 			m = len(r[i])
 	return np.zeros(len(r), m, 131)
 
-def max_index(r):
+def max_index(r, p):
 	m = 0
 	k = 0
 	for i in range(len(r)):
+		if i == p:
+			continue
 		if r[i] > m:
 			m = r[i]
 			k = i
-
+	if r[p] > 2*m:#To prevent getting stuck on one note
+		k = p
+		print "Exception"
+	print k	
 	return k
 
 def normalize(r):
@@ -94,10 +99,9 @@ def create_model(loss='binary_crossentropy', optimizer='rmsprop'):
 	#l = int(x.shape[1])
 	model = Sequential()
 	#model.add(LSTM(256, return_sequences=True, input_dim=131, forget_bias_init='one', activation="tanh", dropout_U=0.4))
-	model.add(LSTM(256, return_sequences=True, input_dim=128, forget_bias_init='one', activation="tanh", dropout_U=0.3))
-
-	model.add(Dropout(0))
-	model.add(LSTM(128, return_sequences=False, forget_bias_init='one', activation="tanh"))
+	model.add(LSTM(512, return_sequences=True, input_dim=128, forget_bias_init='one', activation="tanh", dropout_U=0.3))
+	model.add(LSTM(256, return_sequences=False, forget_bias_init='one', activation="tanh", dropout_U=0.3))
+	model.add(Dropout(0.4))
 	#Add a Dense layer with ReLU?
 	#model.add(Dense(131, activation="sigmoid"))#Change to threashholded ReLU or SReLU
 	#model.add(Dense(131, activation="relu"))
@@ -150,10 +154,12 @@ def to_midi(r, norm=True, max_time=0, max_tempo=0, min_tempo=0):
 	mid = generate_midi.generate(l)
 	return mid
 
-def clamp(r):#Some weird behaviour here, there are still negative numbers
+def clamp(r, prev):#Some weird behaviour here, there are still negative numbers
 	r = r.tolist()
 	r = r[0]
-	i = max_index(r)
+	i = max_index(r, prev)
+	if i == prev:
+		print "Wtf"
 	r = [0]*128
 	r[i] = 1
 	"""for k in range(1, 129):
@@ -162,17 +168,18 @@ def clamp(r):#Some weird behaviour here, there are still negative numbers
 		if r[k] > 1.0:
 			r[k] = 1.0
 	"""
-	return np.array(r)
+	return i, np.array(r)
 	
 
 def predict(x, model, length=1000, clmp=True):#With the new, badass way of doing things
 	#r = x#Fill with something
 	#TODO Replace x with tempo. Fill rest with zeros. Maybe
+	prev = 0
 	for i in range(length):
 		#nxt = clamp(model.predict(x))
 		nxt = model.predict(x)
 		if clmp:
-			nxt = clamp(nxt)
+			prev, nxt = clamp(nxt, prev)
 		#if nxt == [0]*131:
 			#return x
 		x = np.append(x, nxt)
@@ -181,11 +188,13 @@ def predict(x, model, length=1000, clmp=True):#With the new, badass way of doing
 
 	return x
 
-def train(model, songs, delta=5):
+def train(model, songs, delta=5, length=999999):
 	maxlen = 0
 	for s in songs:
 		if len(s) > maxlen:
 			maxlen = len(s)
+	if maxlen > length:
+		maxlen = length
 
 	for i in range(1, maxlen-1, delta):
 		x = []
@@ -199,7 +208,8 @@ def train(model, songs, delta=5):
 		if(len(x) == 0): return
 		x = np.array(x)
 		y = np.array(y)
-		print x.shape
+		if ((i-1) % 10) == 0:
+			print i 
 		model.train_on_batch(x, y)
 
 	print "done"
