@@ -63,8 +63,8 @@ def parse(filename):
 				#Velocity
 				v = p[u][i].data[1]
 				if v != 0:
-					frame = [0]*128
-					frame[p[u][i].data[0]] = 1 if v != 0 else 0 
+					frame = [0]*88
+					frame[p[u][i].data[0]-21] = 1 if v != 0 else 0 
 					r.append(frame)
 			"""
 			elif type(p[u][i]) == midi.ControlChangeEvent: #The Pedal

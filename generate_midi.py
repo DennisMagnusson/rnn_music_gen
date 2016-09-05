@@ -90,7 +90,7 @@ def generate(r):
 	for i in r:
 		n = nonzero_index(i)
 		t = 400
-		track.append(midi.NoteOnEvent(tick=t, data=[n, 127]))
+		track.append(midi.NoteOnEvent(tick=t, data=[n+21, 127]))
 
 	#Cycle through and create events
 	"""
