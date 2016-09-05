@@ -99,13 +99,13 @@ def create_model(loss='binary_crossentropy', optimizer='rmsprop'):
 	#l = int(x.shape[1])
 	model = Sequential()
 	#model.add(LSTM(256, return_sequences=True, input_dim=131, forget_bias_init='one', activation="tanh", dropout_U=0.4))
-	model.add(LSTM(512, return_sequences=True, input_dim=128, forget_bias_init='one', activation="tanh", dropout_U=0.3))
+	model.add(LSTM(512, return_sequences=True, input_dim=88, forget_bias_init='one', activation="tanh", dropout_U=0.3))
 	model.add(LSTM(256, return_sequences=False, forget_bias_init='one', activation="tanh", dropout_U=0.3))
 	model.add(Dropout(0.4))
 	#Add a Dense layer with ReLU?
 	#model.add(Dense(131, activation="sigmoid"))#Change to threashholded ReLU or SReLU
 	#model.add(Dense(131, activation="relu"))
-	model.add(Dense(128, activation="softmax"))
+	model.add(Dense(88, activation="softmax"))
 	#model.add(Activation(ThresholdedReLU(theta=0.1)))
 	#model.compile(loss=loss, optimizer='rmsprop')
 	model.compile(loss=loss, optimizer=optimizer)
@@ -160,7 +160,7 @@ def clamp(r, prev):#Some weird behaviour here, there are still negative numbers
 	i = max_index(r, prev)
 	if i == prev:
 		print "Wtf"
-	r = [0]*128
+	r = [0]*88
 	r[i] = 1
 	"""for k in range(1, 129):
 		if r[k] < 10.0/127.0:
@@ -183,7 +183,7 @@ def predict(x, model, length=1000, clmp=True):#With the new, badass way of doing
 		#if nxt == [0]*131:
 			#return x
 		x = np.append(x, nxt)
-		x = x.reshape(1, i+2, 128)
+		x = x.reshape(1, i+2, 88)
 		#r.append(model.predict(r))
 
 	return x
