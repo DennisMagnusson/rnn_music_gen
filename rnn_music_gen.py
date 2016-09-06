@@ -33,18 +33,26 @@ def to_dataset(r):
 			m = len(r[i])
 	return np.zeros(len(r), m, 131)
 
-def max_index(r, p):
+def max_index(r, x):
 	m = 0
 	k = 0
+	prev = x[len(x)-1].index(1)
+	if len(x) > 2:
+		prev2 = x[len(x)-2].index(1)
+	else:
+		prev2=-1
+
 	for i in range(len(r)):
-		if i == p:
+		if i == prev or i == prev2:
 			continue
 		if r[i] > m:
 			m = r[i]
 			k = i
-	if r[p] > 2*m:#To prevent getting stuck on one note
-		k = p
+	if r[prev] > 2*m:#To prevent getting stuck on one note
+		k = prev
 		print "Exception"
+	elif r[prev2] > 1.5*m:#To prevent getting stuck on two notes
+		k = prev2
 	print k	
 	return k
 
@@ -100,16 +108,30 @@ def create_model(loss='binary_crossentropy'):#, optimizer='rmsprop'):
 	#l = int(x.shape[1])
 	model = Sequential()
 	#model.add(LSTM(256, return_sequences=True, input_dim=131, forget_bias_init='one', activation="tanh", dropout_U=0.4))
-	model.add(LSTM(512, return_sequences=True, input_dim=88, forget_bias_init='one', activation="tanh", dropout_U=0.3))
-	model.add(LSTM(256, return_sequences=False, forget_bias_init='one', activation="tanh", dropout_U=0.3))
+	model.add(LSTM(512, 
+			return_sequences=True,
+			input_dim=88, 
+			forget_bias_init='one', 
+			activation="tanh", 
+			dropout_U=0.3, 
+			init='normal', 
+			inner_init='glorot_normal'))
+
+	model.add(LSTM(256, 
+			return_sequences=False, 
+			forget_bias_init='one', 
+			activation="tanh", 
+			dropout_U=0.3, 
+			init='normal', 
+			inner_init='glorot_normal'))
+	
 	model.add(Dropout(0.4))
-	#Add a Dense layer with ReLU?
-	#model.add(Dense(131, activation="sigmoid"))#Change to threashholded ReLU or SReLU
-	#model.add(Dense(131, activation="relu"))
-	model.add(Dense(88, activation="softmax"))
-	#model.add(Activation(ThresholdedReLU(theta=0.1)))
-	#model.compile(loss=loss, optimizer='rmsprop')
-	optimizer = RMSprop(lr=0.1)
+	
+	model.add(Dense(88, 
+			activation="softmax", 
+			init='normal'))
+
+	optimizer = RMSprop(lr=0.001)
 	model.compile(loss=loss, optimizer=optimizer)
 	
 	"""	
@@ -156,34 +178,24 @@ def to_midi(r, norm=True, max_time=0, max_tempo=0, min_tempo=0):
 	mid = generate_midi.generate(l)
 	return mid
 
-def clamp(r, prev):#Some weird behaviour here, there are still negative numbers
-	r = r.tolist()
-	r = r[0]
-	i = max_index(r, prev)
-	if i == prev:
-		print "Wtf"
+def clamp(r, x):#Some weird behaviour here, there are still negative numbers
+	r = r.tolist()[0]
+	x = x.tolist()[0]
+	i = max_index(r, x)
 	r = [0]*88
 	r[i] = 1
-	"""for k in range(1, 129):
-		if r[k] < 10.0/127.0:
-			r[k] = 0.0
-		if r[k] > 1.0:
-			r[k] = 1.0
-	"""
-	return i, np.array(r)
+	
+	return np.array(r)
 	
 
 def predict(x, model, length=1000, clmp=True):#With the new, badass way of doing things
 	#r = x#Fill with something
 	#TODO Replace x with tempo. Fill rest with zeros. Maybe
-	prev = 0
 	for i in range(length):
 		#nxt = clamp(model.predict(x))
 		nxt = model.predict(x)
 		if clmp:
-			prev, nxt = clamp(nxt, prev)
-		#if nxt == [0]*131:
-			#return x
+			nxt = clamp(nxt, x)#TODO use x as argument for clamp
 		x = np.append(x, nxt)
 		x = x.reshape(1, i+2, 88)
 		#r.append(model.predict(r))
