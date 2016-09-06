@@ -1,7 +1,6 @@
 import midi
 from operator import itemgetter
 from math import floor
-
 def nonzero(r):
 	n = 0
 	for i in r:

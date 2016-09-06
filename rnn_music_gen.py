@@ -33,7 +33,7 @@ def to_dataset(r):
 			m = len(r[i])
 	return np.zeros(len(r), m, 131)
 
-def max_index(r, x):
+def max_index(r, x):#TODO Modify to decrease the probability of notes
 	m = 0
 	k = 0
 	prev = x[len(x)-1].index(1)
