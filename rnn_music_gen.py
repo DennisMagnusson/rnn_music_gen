@@ -48,11 +48,14 @@ def max_index(r, x):#TODO Modify to decrease the probability of notes
 		if r[i] > m:
 			m = r[i]
 			k = i
+	
 	if r[prev] > 2*m:#To prevent getting stuck on one note
 		k = prev
 		print "Exception"
 	elif r[prev2] > 1.5*m:#To prevent getting stuck on two notes
 		k = prev2
+		print "hm"
+	
 	print k	
 	return k
 
@@ -108,15 +111,13 @@ def create_model(loss='binary_crossentropy'):#, optimizer='rmsprop'):
 	#l = int(x.shape[1])
 	model = Sequential()
 
-	#model.add(Dropout(0.4, input_dim=88))
-	
 	model.add(LSTM(512,
 			dropout_W=0.4,
 			return_sequences=True,
 			input_dim=88,
 			forget_bias_init='one',
 			activation="tanh",
-			dropout_U=0.3,
+			dropout_U=0.4,
 			init='normal',
 			inner_init='glorot_normal'))
 
@@ -124,10 +125,10 @@ def create_model(loss='binary_crossentropy'):#, optimizer='rmsprop'):
 			return_sequences=False,
 			forget_bias_init='one',
 			activation="tanh",
-			dropout_U=0.3,
+			dropout_U=0.4,
 			init='normal',
 			inner_init='glorot_normal'))
-	
+
 	model.add(Dense(88,
 			activation="softmax",
 			init='normal'))
@@ -171,7 +172,7 @@ def filter_data(songs, size):#Reomves songs over a specific size
 
 	return songs
 
-def to_midi(r, norm=True, max_time=0, max_tempo=0, min_tempo=0):
+def to_midi(r, norm=False, max_time=0, max_tempo=0, min_tempo=0):
 	l = r.tolist()
 	l = l[0]
 	if norm:
