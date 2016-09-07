@@ -107,28 +107,29 @@ def create_model(loss='binary_crossentropy'):#, optimizer='rmsprop'):
 	#The super awesome new and improved one
 	#l = int(x.shape[1])
 	model = Sequential()
-	#model.add(LSTM(256, return_sequences=True, input_dim=131, forget_bias_init='one', activation="tanh", dropout_U=0.4))
-	model.add(LSTM(512, 
+
+	#model.add(Dropout(0.4, input_dim=88))
+	
+	model.add(LSTM(512,
+			dropout_W=0.4,
 			return_sequences=True,
-			input_dim=88, 
-			forget_bias_init='one', 
-			activation="tanh", 
-			dropout_U=0.3, 
-			init='normal', 
+			input_dim=88,
+			forget_bias_init='one',
+			activation="tanh",
+			dropout_U=0.3,
+			init='normal',
 			inner_init='glorot_normal'))
 
-	model.add(LSTM(256, 
-			return_sequences=False, 
-			forget_bias_init='one', 
-			activation="tanh", 
-			dropout_U=0.3, 
-			init='normal', 
+	model.add(LSTM(256,
+			return_sequences=False,
+			forget_bias_init='one',
+			activation="tanh",
+			dropout_U=0.3,
+			init='normal',
 			inner_init='glorot_normal'))
 	
-	model.add(Dropout(0.4))
-	
-	model.add(Dense(88, 
-			activation="softmax", 
+	model.add(Dense(88,
+			activation="softmax",
 			init='normal'))
 
 	optimizer = RMSprop(lr=0.001)
