@@ -16,14 +16,6 @@ from keras.layers import Recurrent, LSTM, GRU
 from keras.layers.core import Dense, Dropout, Activation, Masking
 from keras.layers.advanced_activations import SReLU, ThresholdedReLU
 from keras.optimizers import RMSprop
-#from keras.layers.embeddings import Embedding
-
-def to_dataset(r):
-	m = 0
-	for i in range(len(r)):
-		if len(r[i]) > m:
-			m = len(r[i])
-	return np.zeros(len(r), m, 131)
 
 def max_index(r, x):#TODO Modify to decrease the probability of notes
 	m = 0
@@ -35,8 +27,7 @@ def max_index(r, x):#TODO Modify to decrease the probability of notes
 		prev2=-1
 
 	for i in range(len(r)):
-		if i == prev or i == prev2:
-			continue
+		if i == prev or i == prev2: continue
 		if r[i] > m:
 			m = r[i]
 			k = i
@@ -79,6 +70,7 @@ def remove_duplicates(r):
 		if r[i] == r[i-1]:
 			r.pop(i)
 			i = i-1
+
 		i = i+1
 
 	return r
@@ -90,6 +82,7 @@ def denormalize(r, max_time, max_tempo, min_tempo):
 			v = int(math.floor(k*127))
 			#Make sure you do l = l[0] if there is an error here
 			r[t][u] = int(0) if v < 15.0 else v
+
 		time = r[t][0]
 		r[t][0] = int(0) if time < 0.0 else int(math.floor(time*max_time))
 		tempo = r[t][130]
@@ -103,23 +96,24 @@ def create_model(loss='binary_crossentropy'):
 
 	model.add(LSTM(512,
 	        dropout_W=0.4,
+	        dropout_U=0.4,
 	        return_sequences=True,
 	        input_dim=88,
 	        forget_bias_init='one',
 	        activation="tanh",
-	        dropout_U=0.4,
 	        init='normal',
 	        inner_init='glorot_normal'))
 
 	model.add(LSTM(256,
+	        dropout_U=0.4,
 	        return_sequences=False,
 	        forget_bias_init='one',
 	        activation="tanh",
-	        dropout_U=0.4,
 	        init='normal',
 	        inner_init='glorot_normal'))
 
 	model.add(Dense(88,
+	        dropout=0.4,
 	        activation="softmax",
 	        init='normal'))
 
@@ -135,10 +129,8 @@ def create_dataset(norm=False, size=999999):
 		s = parse_midi.parse("music/"+i)
 		if len(s) <= size:
 			songs.append(s)
-	if norm:
-		return normalize(songs)
-	else:
-		return songs
+	
+	return normalize(songs) if norm else return songs
 
 def filter_data(songs, size):#Reomves songs over a specific size
 	i = 0
@@ -146,6 +138,7 @@ def filter_data(songs, size):#Reomves songs over a specific size
 		if len(songs[i]) > size:
 			songs.pop(i)
 			i -= 1
+
 		i += 1
 
 	return songs
@@ -155,6 +148,7 @@ def to_midi(r, norm=False, max_time=0, max_tempo=0, min_tempo=0):
 	l = l[0]
 	if norm:
 		l = denormalize(l, max_time=max_time, max_tempo=max_tempo, min_tempo=min_tempo)
+
 	mid = generate_midi.generate(l)
 	return mid
 
@@ -173,6 +167,7 @@ def predict(x, model, length=1000, clmp=True):
 		nxt = model.predict(x)
 		if clmp:
 			nxt = clamp(nxt, x)
+
 		x = np.append(x, nxt)
 		x = x.reshape(1, i+2, 88)
 
@@ -183,6 +178,7 @@ def train(model, songs, delta=5, length=999999):
 	for s in songs:
 		if len(s) > maxlen:
 			maxlen = len(s)
+
 	if maxlen > length:
 		maxlen = length
 
@@ -191,8 +187,6 @@ def train(model, songs, delta=5, length=999999):
 		y = []
 		for s in songs:
 			if(len(s) <= i+1): continue
-			#for k in range(i+1):
-				#x.append(s[k])
 			x.append(s[0:i])
 			y.append(s[i+1])
 		if(len(x) == 0): return
@@ -200,6 +194,7 @@ def train(model, songs, delta=5, length=999999):
 		y = np.array(y)
 		if ((i-1) % 10) == 0:
 			print i 
+
 		model.train_on_batch(x, y)
 
 	print "done"
