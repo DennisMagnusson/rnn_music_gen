@@ -23,11 +23,16 @@ def max_index(r, x):#TODO Modify to decrease the probability of notes
 	prev = x[len(x)-1].index(1)
 	if len(x) > 2:
 		prev2 = x[len(x)-2].index(1)
+		if len(x) > 3:
+			prev3 = x[len(x)-3].index(1)
+		else:
+			prev3 = -1
 	else:
-		prev2=-1
+		prev2 = -1
+		prev3 = -1
 
 	for i in range(len(r)):
-		if i == prev or i == prev2: continue
+		if i == prev or i == prev2 or i == prev3: continue
 		if r[i] > m:
 			m = r[i]
 			k = i
@@ -38,6 +43,9 @@ def max_index(r, x):#TODO Modify to decrease the probability of notes
 	elif r[prev2] > 1.5*m:#To prevent getting stuck on two notes
 		k = prev2
 		print "hm"
+	elif r[prev3] > 1.25*m:
+		k = prev3
+		print "y"
 	
 	print k	
 	return k
@@ -113,7 +121,6 @@ def create_model(loss='binary_crossentropy'):
 	        inner_init='glorot_normal'))
 
 	model.add(Dense(88,
-	        dropout=0.4,
 	        activation="softmax",
 	        init='normal'))
 
@@ -130,7 +137,7 @@ def create_dataset(norm=False, size=999999):
 		if len(s) <= size:
 			songs.append(s)
 	
-	return normalize(songs) if norm else return songs
+	return normalize(songs) if norm else songs
 
 def filter_data(songs, size):#Reomves songs over a specific size
 	i = 0
