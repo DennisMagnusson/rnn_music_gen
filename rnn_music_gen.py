@@ -54,7 +54,7 @@ def normalize(r):
 				max_time = float(r[i][t][0])
 			if max_tempo < r[i][t][130]:
 				max_tempo= float(r[i][t][130])
-			if min_tempo > r[i][t][130]:
+			elif min_tempo > r[i][t][130]:
 				min_tempo= float(r[i][t][130])
 
 	for i in range(len(r)):
