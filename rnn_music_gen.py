@@ -30,6 +30,11 @@ def max_index(r, x):#TODO Modify to decrease the probability of notes
 	else:
 		prev2 = -1
 		prev3 = -1
+	
+	if prev2 == prev:
+		prev2 = -1
+	if prev3 == prev:
+		prev3 = -1
 
 	for i in range(len(r)):
 		if i == prev or i == prev2 or i == prev3: continue
@@ -124,7 +129,7 @@ def create_model(loss='binary_crossentropy'):
 	        activation="softmax",
 	        init='normal'))
 
-	optimizer = RMSprop(lr=0.001)
+	optimizer = RMSprop(lr=0.0006)
 	model.compile(loss=loss, optimizer=optimizer)
 	
 	return model
