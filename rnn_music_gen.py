@@ -10,6 +10,7 @@ import h5py
 from os import listdir
 
 import math
+import random
 
 from keras.models import Sequential
 from keras.layers import Recurrent, LSTM, GRU
@@ -109,7 +110,7 @@ def create_model(loss='binary_crossentropy'):
 
 	model.add(LSTM(512,
 	        dropout_W=0.4,
-	        dropout_U=0.4,
+	        #dropout_U=0.4,
 	        return_sequences=True,
 	        input_dim=88,
 	        forget_bias_init='one',
@@ -117,8 +118,10 @@ def create_model(loss='binary_crossentropy'):
 	        init='normal',
 	        inner_init='glorot_normal'))
 
+	model.add(Dropout(0.5))
+
 	model.add(LSTM(256,
-	        dropout_U=0.4,
+	        #dropout_U=0.4,
 	        return_sequences=False,
 	        forget_bias_init='one',
 	        activation="tanh",
@@ -129,7 +132,7 @@ def create_model(loss='binary_crossentropy'):
 	        activation="softmax",
 	        init='normal'))
 
-	optimizer = RMSprop(lr=0.0006)
+	optimizer = RMSprop(lr=0.022)
 	model.compile(loss=loss, optimizer=optimizer)
 	
 	return model
@@ -172,28 +175,36 @@ def clamp(r, x):
 	r[i] = 1
 	
 	return np.array(r)
+
+def sample(r):#TODO Add temperature
+	r = r[0]
+	s = r[:]#Super fast way to copy list. Seriously.
+	random.shuffle(s)
+
+	n = random.random()
+	for i in range(len(r)):
+		n -= s[i]
+		if n <= 0:
+			l = [0]*len(r)
+			l[r.index(s[i])] = 1
+			print r.index(s[i])
+			return np.array(l)
+
+	return -1
 	
 
-def predict(x, model, length=1000, clmp=True):
+def predict(x, model, length=1000):#, clmp=True):
 	for i in range(length):
-		nxt = model.predict(x)
-		if clmp:
-			nxt = clamp(nxt, x)
+		nxt = sample(model.predict(x).tolist())
+		#if clmp:
+		#	nxt = clamp(nxt, x)
 
 		x = np.append(x, nxt)
 		x = x.reshape(1, i+2, 88)
 
 	return x
 
-def train(model, songs, delta=5, length=999999):
-	maxlen = 0
-	for s in songs:
-		if len(s) > maxlen:
-			maxlen = len(s)
-
-	if maxlen > length:
-		maxlen = length
-
+def fit(model, songs, delta, length, maxlen):
 	for i in range(1, maxlen-1, delta):
 		x = []
 		y = []
@@ -209,4 +220,34 @@ def train(model, songs, delta=5, length=999999):
 
 		model.train_on_batch(x, y)
 
-	print "done"
+
+def train(model, songs, delta=5, length=999999, ep=1):
+	maxlen = 0
+	for s in songs:
+		if len(s) > maxlen:
+			maxlen = len(s)
+
+	if maxlen > length:
+		maxlen = length
+
+	for i in range(1, ep+1):
+		print "epoch " + str(i)
+		fit(model, songs, delta, length, maxlen)
+
+	print "Training done"
+	"""
+	for i in range(1, maxlen-1, delta):
+		x = []
+		y = []
+		for s in songs:
+			if(len(s) <= i+1): continue
+			x.append(s[0:i])
+			y.append(s[i+1])
+		if(len(x) == 0): return
+		x = np.array(x)
+		y = np.array(y)
+		if ((i-1) % 10) == 0:
+			print i 
+
+		model.train_on_batch(x, y)
+	"""
