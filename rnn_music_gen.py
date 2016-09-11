@@ -108,31 +108,35 @@ def denormalize(r, max_time, max_tempo, min_tempo):
 def create_model(loss='binary_crossentropy'):
 	model = Sequential()
 
-	model.add(LSTM(512,
+	model.add(LSTM(512,#Leave things at default and move on from there
 	        dropout_W=0.4,
 	        #dropout_U=0.4,
 	        return_sequences=True,
 	        input_dim=88,
-	        forget_bias_init='one',
-	        activation="tanh",
-	        init='normal',
-	        inner_init='glorot_normal'))
+			forget_bias_init='one'))
+	        #forget_bias_init='one',
+	        #activation="tanh",
+			#init='linear',
+			#inner_init='uniform'))
+	        #init='normal',
+	        #inner_init='glorot_normal'))
 
 	model.add(Dropout(0.5))
 
-	model.add(LSTM(256,
+	model.add(LSTM(256,#Leave things at default and move on from there
 	        #dropout_U=0.4,
 	        return_sequences=False,
-	        forget_bias_init='one',
-	        activation="tanh",
-	        init='normal',
-	        inner_init='glorot_normal'))
+			forget_bias_init='one'))
+	        #forget_bias_init='one',
+	        #activation="tanh",
+	        #init='normal',
+	        #inner_init='glorot_normal'))
 
 	model.add(Dense(88,
 	        activation="softmax",
 	        init='normal'))
 
-	optimizer = RMSprop(lr=0.022)
+	optimizer = RMSprop(lr=0.02)
 	model.compile(loss=loss, optimizer=optimizer)
 	
 	return model
@@ -176,8 +180,11 @@ def clamp(r, x):
 	
 	return np.array(r)
 
-def sample(r):#TODO Add temperature
-	r = r[0]
+def sample(r, var):#TODO Add temperature
+	#r = r[0]
+	r = np.log(r) / var
+	r = np.exp(r) / np.sum(np.exp(r))
+	r = r.tolist()[0]
 	s = r[:]#Super fast way to copy list. Seriously.
 	random.shuffle(s)
 
@@ -191,11 +198,13 @@ def sample(r):#TODO Add temperature
 			return np.array(l)
 
 	return -1
-	
 
-def predict(x, model, length=1000):#, clmp=True):
+
+def predict(x, model, length=100, var=1):#, clmp=True):
 	for i in range(length):
-		nxt = sample(model.predict(x).tolist())
+		nxt = model.predict(x)
+		print max(nxt.tolist()[0])
+		nxt = sample(nxt, var)
 		#if clmp:
 		#	nxt = clamp(nxt, x)
 
@@ -218,7 +227,7 @@ def fit(model, songs, delta, length, maxlen):
 		if ((i-1) % 10) == 0:
 			print i 
 
-		model.train_on_batch(x, y)
+		print model.train_on_batch(x, y)
 
 
 def train(model, songs, delta=5, length=999999, ep=1):
