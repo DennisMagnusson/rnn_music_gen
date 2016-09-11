@@ -1,4 +1,5 @@
 from __future__ import division
+from __future__ import print_function
 
 import parse_midi
 import generate_midi
@@ -45,15 +46,15 @@ def max_index(r, x):#TODO Modify to decrease the probability of notes
 	
 	if r[prev] > 2*m:#To prevent getting stuck on one note
 		k = prev
-		print "Exception"
+		print("Exception")
 	elif r[prev2] > 1.5*m:#To prevent getting stuck on two notes
 		k = prev2
-		print "hm"
+		print("hm")
 	elif r[prev3] > 1.25*m:
 		k = prev3
-		print "y"
+		print("y")
 	
-	print k	
+	print(k)
 	return k
 
 def normalize(r):
@@ -194,7 +195,7 @@ def sample(r, var):#TODO Add temperature
 		if n <= 0:
 			l = [0]*len(r)
 			l[r.index(s[i])] = 1
-			print r.index(s[i])
+			print(r.index(s[i]))
 			return np.array(l)
 
 	return -1
@@ -203,7 +204,7 @@ def sample(r, var):#TODO Add temperature
 def predict(x, model, length=100, var=1):#, clmp=True):
 	for i in range(length):
 		nxt = model.predict(x)
-		print max(nxt.tolist()[0])
+		print(max(nxt.tolist()[0]))
 		nxt = sample(nxt, var)
 		#if clmp:
 		#	nxt = clamp(nxt, x)
@@ -226,8 +227,10 @@ def fit(model, songs, delta, length, maxlen):
 		if(len(x) == 0): return
 		x = np.array(x)
 		y = np.array(y)
+		
+		
 		if ((i-1) % 10) == 0:
-			print i 
+			print(str(i)+"/"+str(math.floor(length/delta)), end="\r")#Not working in iPython2
 
 		sum_loss += model.train_on_batch(x, y)
 		n += 1
@@ -245,8 +248,8 @@ def train(model, songs, delta=5, length=999999, ep=1):
 		maxlen = length
 
 	for i in range(1, ep+1):
-		print "epoch " + str(i)
+		print("epoch " + str(i))
 		loss = fit(model, songs, delta, length, maxlen)
-		print "Average loss: ", loss
+		print("Average loss: "+ str(loss))
 
-	print "Training done"
+	print("Training done")
