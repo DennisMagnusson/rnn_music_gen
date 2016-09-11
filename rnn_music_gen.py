@@ -214,6 +214,8 @@ def predict(x, model, length=100, var=1):#, clmp=True):
 	return x
 
 def fit(model, songs, delta, length, maxlen):
+	sum_loss = 0
+	n = 0
 	for i in range(1, maxlen-1, delta):
 		x = []
 		y = []
@@ -227,7 +229,10 @@ def fit(model, songs, delta, length, maxlen):
 		if ((i-1) % 10) == 0:
 			print i 
 
-		print model.train_on_batch(x, y)
+		sum_loss += model.train_on_batch(x, y)
+		n += 1
+
+	return sum_loss/n
 
 
 def train(model, songs, delta=5, length=999999, ep=1):
@@ -241,22 +246,7 @@ def train(model, songs, delta=5, length=999999, ep=1):
 
 	for i in range(1, ep+1):
 		print "epoch " + str(i)
-		fit(model, songs, delta, length, maxlen)
+		loss = fit(model, songs, delta, length, maxlen)
+		print "Average loss: ", loss
 
 	print "Training done"
-	"""
-	for i in range(1, maxlen-1, delta):
-		x = []
-		y = []
-		for s in songs:
-			if(len(s) <= i+1): continue
-			x.append(s[0:i])
-			y.append(s[i+1])
-		if(len(x) == 0): return
-		x = np.array(x)
-		y = np.array(y)
-		if ((i-1) % 10) == 0:
-			print i 
-
-		model.train_on_batch(x, y)
-	"""
