@@ -5,7 +5,6 @@ import parse_midi
 import generate_midi
 
 import numpy as np
-#from sklearn import preprocessing
 import h5py
 
 from os import listdir
@@ -214,7 +213,7 @@ def predict(x, model, length=100, var=1):#, clmp=True):
 
 	return x
 
-def fit(model, songs, delta, length, maxlen):
+def fit(model, songs, delta, length, maxlen, window_size=200):
 	sum_loss = 0
 	n = 0
 	for i in range(1, maxlen-1, delta):
@@ -222,15 +221,14 @@ def fit(model, songs, delta, length, maxlen):
 		y = []
 		for s in songs:
 			if(len(s) <= i+1): continue
-			x.append(s[0:i])
+			k = 0 if i < window_size else i-window_size#Making it run faster by making a window
+			x.append(s[k:i])
 			y.append(s[i+1])
 		if(len(x) == 0): return
 		x = np.array(x)
 		y = np.array(y)
 		
-		
-		if ((i-1) % 10) == 0:
-			print(str(i)+"/"+str(math.floor(length/delta)), end="\r")#Not working in iPython2
+		print(str(i)+"/"+str(math.floor(length/delta)), end="\r")#Not working in iPython2
 
 		sum_loss += model.train_on_batch(x, y)
 		n += 1
