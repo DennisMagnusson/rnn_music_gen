@@ -199,9 +199,14 @@ def sample(r, var):
 	return -1
 
 
-def predict(x, model, length=100, var=1):#, clmp=True):
+def predict(x, model, length=100, var=1, window_size=200):#, clmp=True):
 	for i in range(length):
-		nxt = model.predict(x)
+		#Window	
+		l = len(x.tolist())
+		k = 0 if l < window_size else l-window_size
+		arr = np.array(x[k:l-1])
+		nxt = model.predict(arr)
+
 		print(max(nxt.tolist()[0]))
 		nxt = sample(nxt, var)
 		#if clmp:
