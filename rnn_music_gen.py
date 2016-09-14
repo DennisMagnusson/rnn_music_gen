@@ -180,8 +180,7 @@ def clamp(r, x):
 	
 	return np.array(r)
 
-def sample(r, var):#TODO Add temperature
-	#r = r[0]
+def sample(r, var):
 	r = np.log(r) / var
 	r = np.exp(r) / np.sum(np.exp(r))
 	r = r.tolist()[0]
@@ -213,7 +212,7 @@ def predict(x, model, length=100, var=1):#, clmp=True):
 
 	return x
 
-def fit(model, songs, delta, length, maxlen, window_size=200):
+def fit(model, songs, delta, maxlen, window_size=200):
 	sum_loss = 0
 	n = 0
 	for i in range(1, maxlen-1, delta):
@@ -221,14 +220,15 @@ def fit(model, songs, delta, length, maxlen, window_size=200):
 		y = []
 		for s in songs:
 			if(len(s) <= i+1): continue
-			k = 0 if i < window_size else i-window_size#Making it run faster by making a window
+			#Add window to make it run faster
+			k = 0 if i < window_size else i-window_size
 			x.append(s[k:i])
 			y.append(s[i+1])
 		if(len(x) == 0): return
 		x = np.array(x)
 		y = np.array(y)
 		
-		print(str(i)+"/"+str(math.floor(length/delta)), end="\r")#Not working in iPython2
+		print(str(i)+"/"+str(math.floor(maxlen/delta)), end="\r")#Not working in iPython2
 
 		sum_loss += model.train_on_batch(x, y)
 		n += 1
